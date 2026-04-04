@@ -1,0 +1,110 @@
+{
+  "info": {
+    "name": "BlinkShield AI",
+    "_postman_id": "0d3f246d-8f1e-4b3f-8a8a-blinkshield",
+    "description": "Hackathon-ready collection for BlinkShield AI backend and AI engine.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login Worker",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{backend}}/auth/login",
+          "host": ["{{backend}}"],
+          "path": ["auth", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"asha@blinkshield.demo\",\n  \"password\": \"Pass@123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Calculate Premium",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{backend}}/premium/calculate",
+          "host": ["{{backend}}"],
+          "path": ["premium", "calculate"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"workerId\": \"{{workerId}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Simulate Heavy Rainfall",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{backend}}/disruptions/simulate",
+          "host": ["{{backend}}"],
+          "path": ["disruptions", "simulate"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"heavy_rainfall\",\n  \"zone\": \"Koramangala-5th-Block\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Run AI Orchestrator",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{ai}}/ai/run-orchestrator",
+          "host": ["{{ai}}"],
+          "path": ["ai", "run-orchestrator"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"worker\": {\n    \"_id\": \"demo-worker\",\n    \"assignedZone\": \"Koramangala-5th-Block\",\n    \"payoutMethod\": { \"provider\": \"mock-razorpay\" }\n  },\n  \"worker_profile\": {\n    \"avgWeeklyEarnings\": 4200,\n    \"avgDailyHours\": 8\n  },\n  \"policy\": {\n    \"isActive\": true,\n    \"coverageAmount\": 400,\n    \"weeklyPremium\": 40\n  },\n  \"event_context\": {\n    \"zone\": \"Koramangala-5th-Block\",\n    \"dark_store_id\": \"BLR-KRM-01\",\n    \"weather\": { \"rainfallMm\": 72, \"temperatureC\": 31 },\n    \"aqi\": { \"aqi\": 120 },\n    \"zone_status\": { \"zoneRestricted\": false, \"darkStoreClosed\": false },\n    \"platform_status\": { \"orderSuspension\": false }\n  },\n  \"fraud_context\": {\n    \"network_consistency\": 0.9,\n    \"claim_history\": { \"claim_frequency_30d\": 1 },\n    \"active_delivery_logs\": {\n      \"gps_stability_score\": 0.87,\n      \"movement_distance_ratio\": 0.7,\n      \"avg_speed\": 18,\n      \"accelerometer_motion_score\": 0.8,\n      \"delivery_completion_rate\": 0.83,\n      \"network_geo_consistency\": 0.9,\n      \"cross_worker_trigger_similarity\": 0.21,\n      \"active_minutes_during_window\": 92\n    }\n  },\n  \"estimated_income_loss\": 230\n}"
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "backend", "value": "http://localhost:5000/api" },
+    { "key": "ai", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "workerId", "value": "" }
+  ]
+}
+

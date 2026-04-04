@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens ─────────────────────────────── */
+:root {
+  --ink: #06141b;
+  --shell: #f4f7f5;
+  --surge: #17a673;
+  --ocean: #0d4c92;
+  --ember: #ff7849;
+  --radius-card: 24px;
+  --radius-button: 14px;
+  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--ink);
+  background: var(--shell);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Base body ─────────────────────────────────── */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 5% 5%, rgba(23, 166, 115, 0.12), transparent 35%),
+    radial-gradient(circle at 95% 10%, rgba(13, 76, 146, 0.10), transparent 35%),
+    radial-gradient(circle at 50% 95%, rgba(255, 120, 73, 0.06), transparent 40%),
+    var(--shell);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ── Glass morphism ────────────────────────────── */
+.glass {
+  @apply border border-white/50 bg-white/80 backdrop-blur-xl;
+}
+
+.glass-heavy {
+  @apply border border-white/70 backdrop-blur-2xl;
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+/* ── Glass card with hover ─────────────────────── */
+.glass-card {
+  @apply glass rounded-3xl;
+  box-shadow: 0 4px 24px rgba(6, 20, 27, 0.08);
+  transition: var(--transition-base);
+  transition-property: transform, box-shadow;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(6, 20, 27, 0.12);
+}
+
+/* ── Background grid ───────────────────────────── */
+.section-grid {
+  background-size: 24px 24px;
+}
+
+/* ── Custom scrollbar ──────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 20, 27, 0.15);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 20, 27, 0.25);
+}
+
+/* ── Form inputs (layered so utilities like pl-10 can override) ── */
+@layer components {
+  .input-field {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-ink outline-none;
+    transition: var(--transition-base);
+    transition-property: border-color, box-shadow;
+  }
+
+  .input-field:focus {
+    @apply border-ocean ring-2 ring-ocean/15;
+  }
+
+  .input-field::placeholder {
+    @apply text-slate-400;
+  }
+
+  .select-field {
+    @apply input-field appearance-none bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b9aad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 12px center;
+    padding-right: 40px;
+  }
+
+  /* ── Label styles ──────────────────────────────── */
+  .form-label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+
+  /* ── Stat number animation ─────────────────────── */
+  .stat-value {
+    @apply text-3xl font-extrabold tracking-tight text-ink;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Tooltip styling for Recharts ──────────────── */
+.recharts-default-tooltip {
+  background: var(--ink) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+  box-shadow: 0 18px 48px rgba(6, 20, 27, 0.10) !important;
+}
+.recharts-tooltip-label {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.recharts-tooltip-item {
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* ── Stagger animation delays ──────────────────── */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+
+/* ── Pulse dot (live indicator) ────────────────── */
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(23, 166, 115, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(23, 166, 115, 0); }
+}
+.live-dot {
+  @apply h-2.5 w-2.5 rounded-full bg-surge;
+  animation: livePulse 2s infinite;
+}
+
+/* ── Badge dot ─────────────────────────────────── */
+.badge-dot {
+  @apply inline-block h-1.5 w-1.5 rounded-full;
+}

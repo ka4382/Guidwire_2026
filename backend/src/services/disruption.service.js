@@ -1,0 +1,162 @@
+import { DisruptionEvent } from "../models/DisruptionEvent.js";
+import { User } from "../models/User.js";
+import { getDisruption } from "./aiEngine.service.js";
+import {
+  buildSimulationState,
+  buildZoneStatus,
+  getAqi,
+  getDarkStoreByZone,
+  getPlatformStatus,
+  getWeather
+} from "./mockProvider.service.js";
+import { runClaimsForEvent } from "./claim.service.js";
+
+function buildEvidence(type, state, zone) {
+  const evidenceMap = {
+    heavy_rainfall: {
+      summary: `Heavy rain reached ${state.observedValue}mm near ${zone}.`,
+      payload: state.weather
+    },
+    extreme_heat: {
+      summary: `Heat touched ${state.observedValue}C during peak order window.`,
+      payload: state.weather
+    },
+    severe_pollution: {
+      summary: `AQI crossed ${state.observedValue} with visibility concerns.`,
+      payload: state.aqi
+    },
+    zone_restriction: {
+      summary: "Dark-store geofence moved to restricted and store was closed.",
+      payload: state.zoneStatus
+    },
+    platform_outage: {
+      summary: "Locality faced order suspension from Blinkit activity feed.",
+      payload: state.platformStatus
+    },
+    gps_spoof_attack: {
+      summary: "Synthetic heavy rainfall created to test fraud detection path.",
+      payload: state.weather
+    }
+  };
+
+  return [
+    {
+      source: state.source,
+      summary: evidenceMap[type].summary,
+      payload: evidenceMap[type].payload
+    }
+  ];
+}
+
+function toSeverity(type, observedValue) {
+  if (type === "zone_restriction" || type === "platform_outage") {
+    return "critical";
+  }
+
+  if (type === "severe_pollution") {
+    return observedValue > 340 ? "critical" : "high";
+  }
+
+  if (type === "heavy_rainfall") {
+    return observedValue > 70 ? "critical" : "high";
+  }
+
+  if (type === "extreme_heat") {
+    return observedValue > 44 ? "critical" : "high";
+  }
+
+  return "medium";
+}
+
+export async function getLiveDisruptions(zone) {
+  const zonesToEvaluate = zone
+    ? [zone]
+    : [...new Set((await User.find({ role: "worker" }).lean()).map((user) => user.assignedZone))];
+
+  const results = await Promise.all(
+    zonesToEvaluate.map(async (item) => {
+      const darkStore = getDarkStoreByZone(item);
+      const weather = getWeather(item);
+      const aqi = getAqi(item);
+      const platformStatus = getPlatformStatus(item);
+      const zoneStatus = buildZoneStatus(item, platformStatus);
+
+      return getDisruption(
+        "/ai/disruption-monitor",
+        {
+          zone: item,
+          dark_store_id: darkStore?.darkStoreId || "UNKNOWN",
+          rainfall_mm: weather.rainfallMm,
+          temperature_c: weather.temperatureC,
+          aqi_value: aqi.aqi,
+          zone_restricted: zoneStatus.zoneRestricted,
+          dark_store_closed: zoneStatus.darkStoreClosed,
+          order_suspension: platformStatus.orderSuspension
+        },
+        () => ({
+          disruption_type: "clear",
+          severity: "low",
+          affected_zone: item,
+          trigger_status: false,
+          recommended_claim_window: 0,
+          evidence: [],
+          threshold_value: 0,
+          observed_value: 0,
+          source: "mock-fallback"
+        })
+      );
+    })
+  );
+
+  const activeEvents = await DisruptionEvent.find({ isTriggerActive: true })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return {
+    monitoredZones: results,
+    activeEvents
+  };
+}
+
+export async function simulateDisruption({ type, zone, darkStoreId, durationHours }) {
+  const state = buildSimulationState(type, zone);
+  const darkStore = darkStoreId || getDarkStoreByZone(zone)?.darkStoreId || "UNKNOWN";
+  const now = new Date();
+  const endedAt = new Date(now);
+  endedAt.setHours(now.getHours() + (durationHours || 3));
+
+  const event = await DisruptionEvent.create({
+    type,
+    zone,
+    darkStoreId: darkStore,
+    severity: toSeverity(type, state.observedValue),
+    source: state.source,
+    thresholdValue: state.thresholdValue,
+    observedValue: state.observedValue,
+    startedAt: now,
+    endedAt,
+    isTriggerActive: true,
+    recommendedClaimWindow: durationHours || 3,
+    evidence: buildEvidence(type, state, zone)
+  });
+
+  const affectedWorkers = await User.find({
+    role: "worker",
+    assignedZone: zone
+  }).lean();
+
+  const orchestration = await runClaimsForEvent(event, affectedWorkers, {
+    simulationType: type
+  });
+
+  return {
+    event,
+    affectedWorkers: affectedWorkers.length,
+    claims: orchestration
+  };
+}
+
+export async function getDisruptionHistory() {
+  return DisruptionEvent.find().sort({ createdAt: -1 }).lean();
+}
+
