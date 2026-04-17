@@ -137,7 +137,7 @@ BlinkShield_AI/
 
 ## 📊 Pitch Deck
 
-**Pitch Deck**: [Coming Soon]
+**Pitch Deck**: [[Click Here]](https://docs.google.com/presentation/d/1E_N7hcbKREWUPsCNmDEqTaMxPTKj4ggL/edit?usp=sharing&ouid=108578372458265652384&rtpof=true&sd=true)
 
 ---
 
