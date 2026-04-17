@@ -131,7 +131,7 @@ BlinkShield_AI/
 
 ## 🎥 Demo Video
 
-**Demo Video**: [Coming Soon]
+**Demo Video**: [[click Here](https://youtu.be/pnlubrsX_EA)]
 
 ---
 
@@ -143,7 +143,7 @@ BlinkShield_AI/
 
 ## 👥 Team
 
-**Team Guidewire 2026** — Built for the Guidewire Hackathon
+**Team CodeRed 2026** — Built for the Guidewire Hackathon
 
 ---
 
