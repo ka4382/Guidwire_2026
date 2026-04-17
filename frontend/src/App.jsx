@@ -17,6 +17,11 @@ import { QuotePage } from "./pages/QuotePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { WorkerOnboardingPage } from "./pages/WorkerOnboardingPage";
 
+// Phase 3 pages
+import { DemoPage } from "./pages/DemoPage";
+import { WorkerDashboardV2Page } from "./pages/WorkerDashboardV2Page";
+import { AdminDashboardV2Page } from "./pages/AdminDashboardV2Page";
+
 function ShellPage({ children }) {
   return <AppShell>{children}</AppShell>;
 }
@@ -123,6 +128,37 @@ export default function App() {
           <ProtectedRoute roles={["admin"]}>
             <ShellPage>
               <AdminFraudAlertsPage />
+            </ShellPage>
+          </ProtectedRoute>
+        }
+      />
+      {/* ── Phase 3: New pages ──────────────────────────────────── */}
+      <Route
+        path="/dashboard/worker"
+        element={
+          <ProtectedRoute roles={["worker"]}>
+            <ShellPage>
+              <WorkerDashboardV2Page />
+            </ShellPage>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/admin"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <ShellPage>
+              <AdminDashboardV2Page />
+            </ShellPage>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/demo"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <ShellPage>
+              <DemoPage />
             </ShellPage>
           </ProtectedRoute>
         }

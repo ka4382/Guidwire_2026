@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from fastapi import FastAPI
 
 from app.orchestrator.engine import agentic_orchestrator
@@ -6,6 +8,7 @@ from app.agents.disruption_agent import disruption_monitoring_agent
 from app.agents.fraud_agent import fraud_detection_agent
 from app.agents.payout_agent import payout_execution_agent
 from app.agents.risk_agent import risk_assessment_agent
+from app.services.fraud_explainer import explain_fraud
 from app.models.schemas import (
     ClaimDecisionRequest,
     FraudDetectionRequest,
@@ -79,4 +82,14 @@ def disruption_monitor_get(
 @app.post("/ai/run-orchestrator")
 def run_orchestrator(payload: OrchestratorRequest):
     return agentic_orchestrator.run(payload)
+
+
+# ── Phase 3: Fraud Explainability (stateless wrapper) ───────────────
+@app.post("/ai/fraud-explain")
+def fraud_explain(payload: Dict[str, Any]):
+    """
+    Accepts raw fraud detection output and returns an explainable,
+    UI-ready response with score 0-100, risk level, and reasons.
+    """
+    return explain_fraud(payload)
 

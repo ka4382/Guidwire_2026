@@ -12,6 +12,8 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { useAuth } from "../hooks/useAuth";
 import { formatCurrency } from "../utils/formatters";
 
+import { PaymentModal } from "../components/ui/PaymentModal";
+
 export function QuotePage() {
   const { user } = useAuth();
   const [quote, setQuote] = useState(null);
@@ -19,6 +21,8 @@ export function QuotePage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [activating, setActivating] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedTier, setSelectedTier] = useState("standard");
 
   const loadQuote = async () => {
     setLoading(true);
@@ -33,18 +37,36 @@ export function QuotePage() {
     }
   }, [user?._id]);
 
-  const activatePolicy = async () => {
+  const handlePaymentSuccess = async (method) => {
     setActivating(true);
-    const created = await appApi.createPolicy({ workerId: user._id });
-    const activated = await appApi.activatePolicy(created._id);
-    setPolicy(activated);
-    setMessage("Weekly policy activated. BlinkShield will now auto-monitor your assigned zone.");
-    setActivating(false);
+    try {
+      // Pass tier logic if the backend policy supports tier saving, otherwise it uses quote base
+      const created = await appApi.createPolicy({ workerId: user._id, tier: selectedTier });
+      const paymentResponse = await appApi.simulatePayment({
+        policyId: created._id,
+        method: method
+      });
+      setPolicy(paymentResponse.data);
+      setMessage(paymentResponse.data.message || "Weekly policy activated. BlinkShield will now auto-monitor your assigned zone.");
+      setTimeout(() => {
+        setShowPayment(false);
+      }, 2000);
+    } catch (e) {
+      console.error(e);
+      setMessage("Failed to activate policy via payment mock.");
+    } finally {
+      setActivating(false);
+    }
   };
 
-  if (loading) {
+  if (loading || !quote) {
     return <Loader label="Generating your weekly quote..." />;
   }
+
+  const activePlan = quote.plans?.[selectedTier] || {
+    weekly_premium: quote.weekly_premium,
+    coverage_amount: quote.coverage_amount
+  };
 
   return (
     <div className="space-y-6">
@@ -76,26 +98,68 @@ export function QuotePage() {
               </span>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl bg-gradient-to-br from-[#06141b] to-[#0f2b3a] p-5 text-white">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">Weekly premium</p>
-                <p className="mt-2 text-3xl font-extrabold tracking-tight">{formatCurrency(quote.weekly_premium)}</p>
-              </div>
-              <div className="rounded-2xl bg-gradient-to-br from-[#17a673] to-[#0d9463] p-5 text-white">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">Income coverage</p>
-                <p className="mt-2 text-3xl font-extrabold tracking-tight">{formatCurrency(quote.coverage_amount)}</p>
-              </div>
+            <div className="mt-6 flex flex-col gap-4 md:flex-row">
+              {['lite', 'standard', 'premium'].map((tier) => {
+                const planData = quote.plans?.[tier] || {
+                  weekly_premium: quote.weekly_premium,
+                  coverage_amount: quote.coverage_amount,
+                  label: tier === 'lite' ? 'Lite' : tier === 'standard' ? 'Standard' : 'Premium',
+                };
+                
+                const isSelected = selectedTier === tier;
+                
+                return (
+                  <div 
+                    key={tier}
+                    onClick={() => setSelectedTier(tier)}
+                    className={`flex-1 cursor-pointer rounded-2xl border-2 p-4 transition-all ${
+                      isSelected ? 'border-ocean bg-ocean/5' : 'border-slate-100 bg-white hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                       <p className={`text-[11px] font-bold uppercase tracking-wider ${isSelected ? 'text-ocean' : 'text-slate-500'}`}>
+                         {planData.label}
+                       </p>
+                       {isSelected && <CheckCircle2 size={14} className="text-ocean" />}
+                    </div>
+                    <p className={`text-2xl font-extrabold tracking-tight ${isSelected ? 'text-ocean-dark' : 'text-ink'}`}>
+                      {formatCurrency(planData.weekly_premium)}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-emerald-600">
+                      Covers {formatCurrency(planData.coverage_amount)}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="mt-4 rounded-xl bg-orange-50 p-4 border border-orange-100">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-orange-600 mb-1">
+                Risk Assesment
+              </p>
+              <p className="text-sm font-medium text-orange-800">
+                If bad weather occurs, you may lose <span className="font-bold">₹600</span> in earnings.<br/>
+                Your {" "}<span className="font-bold">{formatCurrency(activePlan.weekly_premium)}</span>{" "} coverage protects up to {" "}<span className="font-bold">{formatCurrency(activePlan.coverage_amount)}</span>.
+              </p>
             </div>
 
             <Button
               variant="success"
               icon={ShieldCheck}
               className="mt-6 w-full"
-              onClick={activatePolicy}
+              onClick={() => setShowPayment(true)}
               disabled={activating}
             >
               {activating ? "Activating..." : "Activate weekly policy"}
             </Button>
+
+            <PaymentModal 
+              isOpen={showPayment}
+              premiumAmount={activePlan.weekly_premium}
+              coverageAmount={activePlan.coverage_amount}
+              onClose={() => setShowPayment(false)}
+              onSuccess={handlePaymentSuccess}
+            />
 
             {message ? (
               <motion.div
@@ -109,7 +173,7 @@ export function QuotePage() {
             ) : null}
             {policy ? (
               <p className="mt-2 text-xs text-slate-500">
-                Policy ends on {new Date(policy.endDate).toLocaleDateString("en-IN")}
+                Policy ends on {new Date(policy.endDate || policy.validUntil).toLocaleDateString("en-IN")}
               </p>
             ) : null}
           </Card>

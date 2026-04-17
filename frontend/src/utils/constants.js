@@ -22,6 +22,9 @@ export const zoneOptions = [
   "Koramangala-5th-Block",
   "HSR-Layout-Sector-2",
   "Indiranagar-100ft",
-  "Powai-LakeSide"
+  "Powai-LakeSide",
+  "Mumbai-Bandra",
+  "Chennai-Tnagar",
+  "Hyderabad-Hitec"
 ];
 

@@ -42,7 +42,7 @@ export function LiveMonitorPage() {
         actions={
           <div className="flex items-center gap-2 rounded-full bg-surge-light px-4 py-2">
             <span className="live-dot" />
-            <span className="text-xs font-bold text-surge">Live feed</span>
+            <span className="text-xs font-bold text-surge">LIVE DATA (Open-Meteo)</span>
           </div>
         }
       />

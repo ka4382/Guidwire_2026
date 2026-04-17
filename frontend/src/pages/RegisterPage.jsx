@@ -12,7 +12,10 @@ const zoneDarkStoreMap = {
   "Koramangala-5th-Block": "BLR-KRM-01",
   "HSR-Layout-Sector-2": "BLR-HSR-02",
   "Indiranagar-100ft": "BLR-IDR-03",
-  "Powai-LakeSide": "MUM-PWY-01"
+  "Powai-LakeSide": "MUM-PWY-01",
+  "Mumbai-Bandra": "MUM-BND-01",
+  "Chennai-Tnagar": "CHN-TNG-01",
+  "Hyderabad-Hitec": "HYD-HTC-01"
 };
 
 export function RegisterPage() {
@@ -41,7 +44,7 @@ export function RegisterPage() {
     setError("");
     try {
       await register(form);
-      navigate("/onboarding");
+      navigate("/quote");
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Registration failed");
     } finally {

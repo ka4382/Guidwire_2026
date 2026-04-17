@@ -263,6 +263,26 @@ export function FileClaimPage() {
           </div>
         </Card>
 
+        {/* Complaint / Evidence Upload */}
+        <Card className="p-6" hover={false}>
+          <div className="flex items-center gap-2 mb-4">
+            <Radio size={16} className="text-[#0d4c92]" strokeWidth={2.5} />
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400">
+              Provide Evidence
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="border border-dashed border-slate-300 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:bg-slate-100 transition-colors">
+              <span className="text-sm font-medium text-slate-600">Upload Image</span>
+              <p className="mt-1 text-xs text-slate-400">Screenshot or photo (Optional)</p>
+            </div>
+            <div className="border border-dashed border-slate-300 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:bg-slate-100 transition-colors">
+              <span className="text-sm font-medium text-slate-600">Upload Video</span>
+              <p className="mt-1 text-xs text-slate-400">Under 30s (Optional)</p>
+            </div>
+          </div>
+        </Card>
+
         {/* Summary + Submit */}
         <Card className="p-6" hover={false}>
           <div className="flex items-center justify-between gap-4">
@@ -282,8 +302,9 @@ export function FileClaimPage() {
             </Button>
           </div>
           {error && (
-            <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-600">
-              {error}
+            <div className="mt-4 rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-medium text-rose-600 flex items-center gap-2">
+              <AlertTriangle size={16} />
+              {error.includes("active policy") ? "⚠️ Please activate a policy to claim protection" : error}
             </div>
           )}
         </Card>

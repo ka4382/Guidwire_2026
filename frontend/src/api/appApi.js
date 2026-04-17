@@ -32,6 +32,19 @@ export const appApi = {
     fetcher(apiClient.get(`/analytics/worker/${workerId}`)),
   getAdminOverview: () => fetcher(apiClient.get("/analytics/admin/overview")),
   getAdminFraud: () => fetcher(apiClient.get("/analytics/admin/fraud")),
-  getAdminDisruptions: () => fetcher(apiClient.get("/analytics/admin/disruptions"))
+  getAdminDisruptions: () => fetcher(apiClient.get("/analytics/admin/disruptions")),
+
+  // ── Phase 3: Dashboard & Simulation ────────────────────────────────
+  getWorkerDashboardV2: (workerId) =>
+    fetcher(apiClient.get(`/dashboard/worker/${workerId}`)),
+  getAdminDashboardV2: () => fetcher(apiClient.get("/dashboard/admin")),
+  simulateRain: (zone, useRealApi) =>
+    fetcher(apiClient.post("/simulation/rain", { zone, useRealApi })),
+  simulatePollution: (zone, useRealApi) =>
+    fetcher(apiClient.post("/simulation/pollution", { zone, useRealApi })),
+  simulateFraud: (zone, useRealApi) =>
+    fetcher(apiClient.post("/simulation/fraud", { zone, useRealApi })),
+  simulatePayment: (payload) =>
+    fetcher(apiClient.post("/payment/simulate", payload))
 };
 

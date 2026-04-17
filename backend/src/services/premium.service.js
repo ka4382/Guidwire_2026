@@ -96,6 +96,27 @@ export function calculateRiskQuoteFromInputs(input) {
   const weeklyPremium = clamp(basePremium + adjustment, 18, 68);
   coverageAmount = clamp(Math.round((coverageAmount + adjustment * 8) / 10) * 10, 200, 650);
 
+  const plans = {
+    lite: {
+      weekly_premium: Math.round(weeklyPremium * 0.6),
+      coverage_amount: Math.round(coverageAmount * 0.6),
+      label: "Lite Plan",
+      features: ["Basic income protection", "Standard claim processing"]
+    },
+    standard: {
+      weekly_premium: Math.round(weeklyPremium),
+      coverage_amount: Math.round(coverageAmount),
+      label: "Standard Plan",
+      features: ["Full income protection", "Fast claim processing", "Priority support"]
+    },
+    premium: {
+      weekly_premium: Math.round(weeklyPremium * 1.6),
+      coverage_amount: Math.round(coverageAmount * 1.6),
+      label: "Premium Plan",
+      features: ["Max income protection", "Instant AI payouts", "Multi-zone coverage", "Premium support"]
+    }
+  };
+
   const explanation = [
     `Base premium ₹${basePremium}.`,
     safeZoneAdjustment !== 0
@@ -110,12 +131,13 @@ export function calculateRiskQuoteFromInputs(input) {
       : activityAdjustment > 0
         ? `Increased by ₹${activityAdjustment} due to irregular recent activity.`
         : "Activity regularity is neutral.",
-    `Final weekly premium ₹${weeklyPremium} for ₹${coverageAmount} income cover.`
+    `Standard weekly premium ₹${weeklyPremium} for ₹${coverageAmount} income cover.`
   ].join(" ");
 
   return {
-    weekly_premium: weeklyPremium,
+    weekly_premium: weeklyPremium, // Keep standard as default for backward compatibility
     coverage_amount: coverageAmount,
+    plans,
     risk_level: riskLevel,
     explanation,
     pricing_factors: pricingFactors,
