@@ -111,6 +111,7 @@ export function FileClaimPage() {
   const [selectedType, setSelectedType] = useState(null);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const [media, setMedia] = useState(null);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState("");
 
@@ -119,18 +120,30 @@ export function FileClaimPage() {
     if (!selectedType || description.length < 5) return;
     setLoading(true);
     setError("");
+
     try {
-      const result = await appApi.fileClaim({
-        workerId: user._id,
-        eventType: selectedType,
-        description,
-        zone: user.assignedZone
-      });
+      const formData = new FormData();
+      formData.append("workerId", user._id);
+      formData.append("eventType", selectedType);
+      formData.append("description", description);
+      formData.append("zone", user.assignedZone);
+      if (media) {
+        formData.append("media", media);
+      }
+
+      const result = await appApi.fileClaim(formData);
       setSuccess(result);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to file claim. Ensure you have an active policy.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMediaChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMedia(file);
     }
   };
 
@@ -271,15 +284,44 @@ export function FileClaimPage() {
               Provide Evidence
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="border border-dashed border-slate-300 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:bg-slate-100 transition-colors">
-              <span className="text-sm font-medium text-slate-600">Upload Image</span>
-              <p className="mt-1 text-xs text-slate-400">Screenshot or photo (Optional)</p>
-            </div>
-            <div className="border border-dashed border-slate-300 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:bg-slate-100 transition-colors">
-              <span className="text-sm font-medium text-slate-600">Upload Video</span>
-              <p className="mt-1 text-xs text-slate-400">Under 30s (Optional)</p>
-            </div>
+          <div className="grid gap-4 sm:grid-cols-1">
+            <input 
+              type="file" 
+              id="evidence-upload" 
+              className="hidden" 
+              accept="image/*,video/*"
+              onChange={(e) => setMedia(e.target.files[0])}
+            />
+            <label 
+              htmlFor="evidence-upload"
+              className={`border-2 border-dashed p-8 rounded-2xl text-center cursor-pointer transition-all ${
+                media ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100'
+              }`}
+            >
+              {media ? (
+                <div className="flex flex-col items-center">
+                  {media.type.startsWith("image/") ? (
+                    <img 
+                      src={URL.createObjectURL(media)} 
+                      alt="Preview" 
+                      className="h-32 w-auto rounded-lg mb-3 shadow-sm border border-emerald-200"
+                    />
+                  ) : (
+                    <CheckCircle2 className="text-emerald-600 mb-2" size={32} />
+                  )}
+                  <span className="text-sm font-bold text-emerald-800">File Selected: {media.name}</span>
+                  <p className="text-xs text-emerald-600 mt-1">Click to change file</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-2">
+                    <Radio className="text-slate-400" size={24} />
+                  </div>
+                  <span className="text-sm font-medium text-slate-600">Select Image or Video</span>
+                  <p className="mt-1 text-xs text-slate-400">Screenshot or photo of disruption (Max 5MB)</p>
+                </div>
+              )}
+            </label>
           </div>
         </Card>
 

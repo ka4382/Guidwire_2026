@@ -20,35 +20,24 @@ export async function processPolicyPayment(policyId, paymentMethod) {
       throw new Error("Policy not found");
     }
 
-    if (policy.status === "active") {
-      throw new Error("Policy is already active");
-    }
+    // Use findByIdAndUpdate to ensure atomic update and return the NEW document
+    const updatedPolicy = await Policy.findByIdAndUpdate(
+      policyId,
+      {
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        paymentMethod,
+        transactionId: `TXN-${Math.floor(Math.random() * 1000000)}`
+      },
+      { new: true }
+    );
 
-    // Simulate Payment Gateway delay
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    // Simulated transaction details
-    const transactionId = `TXN-${Math.floor(Math.random() * 1000000)}`;
-    const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + 7); // 7-day validity
-
-    // Update policy
-    policy.status = "active";
-    policy.paymentDetails = {
-      method: paymentMethod,
-      transactionId,
-      paidAt: new Date(),
-      amount: policy.weeklyPremium
-    };
-    policy.validUntil = validUntil;
-
-    await policy.save();
+    console.log("[PaymentService] Policy activated:", updatedPolicy._id);
 
     return {
       success: true,
-      policy_status: "ACTIVE",
-      transaction_id: transactionId,
-      payment_method: paymentMethod
+      data: updatedPolicy
     };
   } catch (error) {
     console.error("[PaymentService] Error:", error.message);

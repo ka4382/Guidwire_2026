@@ -30,11 +30,13 @@ export const reviewClaimDecision = asyncHandler(async (req, res) => {
 });
 
 export const fileClaimManually = asyncHandler(async (req, res) => {
+  const mediaUrl = req.file ? `/uploads/${req.file.filename}` : null;
   const data = await fileManualClaim(
     req.body.workerId,
     req.body.eventType,
     req.body.description,
-    req.body.zone
+    req.body.zone,
+    mediaUrl
   );
   res.status(201).json({ success: true, data });
 });

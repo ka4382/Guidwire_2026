@@ -5,6 +5,7 @@ import { WorkerProfile } from "../models/WorkerProfile.js";
 import { User } from "../models/User.js";
 import { ApiError } from "../utils/apiError.js";
 import { callAi } from "./aiEngine.service.js";
+import { Policy } from "../models/Policy.js";
 import { getActivePolicy } from "./policy.service.js";
 import { createPayoutForApprovedClaim } from "./payout.service.js";
 import {
@@ -339,15 +340,21 @@ export async function reviewClaim(claimId, action, notes) {
 }
 
 // ── Manual claim filing by worker ──────────────────────────────────
-export async function fileManualClaim(workerId, eventType, description, zone) {
+export async function fileManualClaim(workerId, eventType, description, zone, mediaUrl) {
   const worker = await User.findById(workerId).lean();
   if (!worker) {
     throw new ApiError(404, "Worker not found");
   }
 
-  const policy = await getActivePolicy(workerId);
+  // Strict valid policy check
+  const policy = await Policy.findOne({
+    workerId,
+    isActive: true,
+    endDate: { $gt: new Date() }
+  });
+
   if (!policy) {
-    throw new ApiError(400, "No active policy found. Please activate a policy first.");
+    throw new ApiError(400, "⚠️ Please activate a policy to claim protection");
   }
 
   // Map event types to severity and thresholds
@@ -403,6 +410,7 @@ export async function fileManualClaim(workerId, eventType, description, zone) {
   // Override auto-decision to 'pending' for manual claims so admin must review
   result.claim.claimStatus = "pending";
   result.claim.decision = "pending_review";
+  result.claim.mediaUrl = mediaUrl; // Store the evidence URL
   result.claim.reasons = [
     ...result.claim.reasons,
     `Worker-reported ${eventType.replace(/_/g, " ")} — pending admin verification`

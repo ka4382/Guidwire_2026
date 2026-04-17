@@ -19,6 +19,7 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan("dev"));
+app.use("/uploads", express.static("uploads"));
 
 app.get("/health", (_req, res) => {
   res.json({

@@ -27,7 +27,9 @@ const policySchema = new mongoose.Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     explanation: { type: String, required: true },
-    pricingFactors: { type: [pricingFactorSchema], default: [] }
+    pricingFactors: { type: [pricingFactorSchema], default: [] },
+    paymentMethod: { type: String },
+    transactionId: { type: String }
   },
   { timestamps: true }
 );

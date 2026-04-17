@@ -49,7 +49,7 @@ export function QuotePage() {
 
       // fetcher() returns response.data.data — paymentResponse IS the result object
       if (paymentResponse && paymentResponse.success) {
-        setPolicy(paymentResponse);
+        setPolicy(paymentResponse.data); // User requested .data here if using result directly
         setMessage("✅ Policy Activated — You are protected for 7 days.");
         setTimeout(() => {
           setShowPayment(false);

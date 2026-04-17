@@ -26,7 +26,8 @@ const claimSchema = new mongoose.Schema(
     decision: { type: String, default: "created" },
     payoutAmount: { type: Number, default: 0 },
     lossWindowHours: { type: Number, default: 0 },
-    reasons: { type: [String], default: [] }
+    reasons: { type: [String], default: [] },
+    mediaUrl: { type: String }
   },
   { timestamps: { createdAt: true, updatedAt: true } }
 );

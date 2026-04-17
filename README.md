@@ -1,96 +1,152 @@
-# BlinkShield AI – AI Powered Income Protection for Gig Workers
+# BlinkShield AI – AI-Powered Income Protection for Gig Workers
 
-![BlinkShield AI Demo](https://via.placeholder.com/1200x600.png?text=BlinkShield+AI+Dashboard+Screenshot)
+> 🏆 **Guidewire Hackathon 2026** — Parametric Micro-Insurance Platform
 
-BlinkShield AI is a state-of-the-art gig worker insurance platform designed specifically for quick commerce drivers (Blinkit, Swiggy Instamart, Zepto). It provides hyper-localized, automated income protection against disruptions like severe weather and unnotified traffic surges. 
+BlinkShield AI is a production-grade gig worker insurance platform built for quick-commerce drivers (Blinkit, Swiggy Instamart, Zepto). It delivers hyper-localized, automated income protection against real-world disruptions — severe weather, zone closures, platform outages, and more.
 
-Built with **React**, **Node.js**, **Express**, **MongoDB**, and **FastAPI (AI Engine)**, it features real-time weather API ingestion, predictive ML-based risk calculation, and a fraud detection system that utilizes metadata anomaly scores to automatically process or flag claims in seconds.
+Built with **React**, **Node.js**, **Express**, **MongoDB**, and **FastAPI (AI Engine)**, it features real-time weather API ingestion, predictive ML-based risk calculation, multi-tier dynamic pricing, and a hybrid fraud detection system that processes claims in seconds.
 
-## 🚀 Features
+---
 
-- **AI-Based Premium Calculation**: Uses individual worker history, historical weather data, and localized risk scores to compute dynamic weekly premiums.
-- **Real-Time Weather Integration**: Connects to the Open-Meteo API to monitor live rainfall. Trigger alerts completely automatically if thresholds are breached.
-- **Fraud Detection (Hybrid Approach)**: ML capabilities embedded via an Isolation Forest structure alongside heuristics to catch anomalous locations, Photoshop tampers, and impossible physics in claim uploads.
-- **Automatic Claim + Payout**: Straight-through processing for valid disruption claims under active policies—no manual adjusters needed!
-- **Dashboard Insights**:
-  - **Worker View:** Active policy limits, predictive insights on upcoming premium surges, and earnings protection details.
-  - **Admin View:** Predictive next-week risk mapping, comprehensive fraud triage queues, and financial overviews.
+## 🚀 Key Features
 
-## 🧠 How it Works
+### 🧠 AI-Powered Core
+- **Dynamic Premium Calculation** — Uses worker history, weather forecasts, and zone-level risk scores to generate personalized weekly premiums across 3 tiers (Lite / Standard / Premium).
+- **Hybrid Fraud Detection** — Isolation Forest ML model + metadata heuristics (GPS physics, Photoshop signatures, timestamp anomalies) for composite fraud scoring.
+- **Predictive Risk Mapping** — Forecasts next-week disruption probability per delivery zone.
 
-The workflow of BlinkShield AI follows a completely deterministic yet intelligent path to ensure zero user friction:
+### 🌦️ Real-Time Disruption Monitoring
+- **Live Weather Integration** — Open-Meteo API streams real-time rainfall, temperature, and AQI data for Indian metro zones.
+- **Automatic Claim Triggers** — Disruption events auto-create claims when thresholds are breached.
+- **Event Deduplication** — Intelligent grouping of similar events with counts and latest timestamps.
 
-1. **Weather** is tracked continuously.
-2. **Disruption** is logged when a designated threshold (e.g. Rainfall > 2mm/hr) is passed in a gig worker's assigned zone.
-3. **Claim** is instantly created and pre-filled.
-4. **Fraud** layer investigates the validity, running algorithms on GPS stability and matching metadata.
-5. **Payout** executes straight-through if the fraud score is sufficiently low, moving money to the worker's wallet in seconds.
+### 💰 End-to-End Payment & Policy System
+- **Multi-Tier Pricing** — Workers choose between Lite (60%), Standard (100%), or Premium (160%) coverage plans.
+- **Simulated Payment Gateway** — UPI/QR and Card payment flows with transaction IDs.
+- **Atomic Policy Activation** — Payment success immediately activates a 7-day policy with persistent `isActive` state in MongoDB.
+- **Income Protection Banner** — Dashboard prominently displays "🛡️ Your income is protected for this week" when active.
 
-## 💰 Payment Flow
-Activating a policy utilizes a simulated payment modal. Workers review their personalized premium bounds (e.g. Pay ₹48 to protect ₹460). Selecting **UPI/QR** or **Card** simulates a secure transaction handshake, immediately activating a 7-day policy complete with a unique `TXN` identifier and validating their claim eligibility.
+### 📋 Claims & Evidence System
+- **Manual Claim Filing** — Workers report 8 disruption types (rainfall, extreme heat, AQI, zone closure, platform outage, curfew, strike, market closure).
+- **Media Upload** — Multer-powered evidence uploads (images/videos, max 5MB) with live preview.
+- **Strict Policy Validation** — Claims require an active, non-expired policy (`isActive: true` + `endDate > now`).
+- **Admin Review Queue** — Manual claims are set to `pending_review` for admin verification.
 
-## 🌍 Real vs Demo Mode
-We wanted to prove both the concept's reliability and its production readiness capability. 
-Within the system dashboard, users can toggle between:
-- **🌍 Real Mode**: Ingests *live* data streams directly via the Open-Meteo API based on Indian latitude/longitude clusters.
-- **🎮 Demo Mode**: Uses an offline, deterministic simulation generator allowing administrators and judges to force-trigger specific disruptions (like severe rain or pollution) regardless of the actual weather.
+### 📊 Intelligent Dashboards
+- **Worker Dashboard** — Active policy status, premium explainability, claims breakdown, earnings summary, and AI insights.
+- **Admin Dashboard** — System-wide analytics, fraud triage queues, disruption heatmaps, and financial overviews.
+- **Empty States** — Clean "No claims yet. You are protected!" messaging for new users.
+
+### 🌍 Real vs Demo Mode
+- **🌍 Real Mode** — Ingests live data from Open-Meteo API based on Indian lat/lng clusters.
+- **🎮 Demo Mode** — Deterministic simulation generator for force-triggering disruptions during presentations.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Frontend Frontstage**: React.js, TailwindCSS, Framer Motion, Vite
-- **Backend Orchestrator**: Node.js, Express.js
-- **Database**: MongoDB (Mongoose)
-- **AI / ML Microservice**: FastAPI, Scikit-Learn (Isolation Forest), Pandas
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React.js, TailwindCSS, Framer Motion, Vite |
+| **Backend** | Node.js, Express.js, Multer (file uploads) |
+| **Database** | MongoDB (Mongoose ODM) |
+| **AI / ML** | FastAPI, Scikit-Learn (Isolation Forest), Pandas |
+| **Infrastructure** | Docker Compose (multi-container orchestration) |
+| **APIs** | Open-Meteo (weather), QRServer (QR generation) |
+
+---
 
 ## ⚙️ Setup Instructions
 
 ### Prerequisites
-Make sure you have Node > v18, Docker, and Python 3.10+ installed. This project runs as a monorepo containing multiple microservices.
+- Node.js ≥ v18
+- Docker & Docker Compose
+- Python 3.10+ (for AI engine)
+
+### Quick Start
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ka4382/Guidwire_2026
-cd project
+git clone https://github.com/ka4382/Guidwire_2026.git
+cd BlinkShield_AI
 
-# 2. Start the entire stack effortlessly using Docker 
-# (Spins up Mongo, Node Backend, Python AI Engine, and Vite Frontend)
-docker compose up -d
+# 2. Start the entire stack with Docker
+docker compose up --build -d
+
+# 3. Access the application
+# Frontend:  http://localhost:5173
+# Backend:   http://localhost:5000
+# AI Engine: http://localhost:8000
 ```
-*The frontend will be available at `http://localhost:5173`. Demo mode exists at `http://localhost:5173/demo`.*
+
+### Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Worker | `rahul@blinkit.com` | `password123` |
+| Admin | `admin@blinkshield.ai` | `admin123` |
+
+---
+
+## 🧪 End-to-End Test Flow
+
+1. **Register/Login** as a worker
+2. **Get Quote** → View personalized Lite / Standard / Premium plans
+3. **Pay & Activate** → Select a plan, complete simulated payment
+4. **Verify Dashboard** → See "🛡️ Income protected" banner + "🟢 ACTIVE POLICY" badge
+5. **File a Claim** → Select disruption type, add description, upload evidence image
+6. **Admin Review** → Login as admin, review pending claims in the triage queue
+7. **Simulation** → Use Demo Mode to force-trigger weather disruptions
+
+---
+
+## 📦 Project Structure
+
+```text
+BlinkShield_AI/
+├── backend/                # Express.js REST API
+│   ├── src/
+│   │   ├── controllers/    # Route handlers (payment, claim, dashboard)
+│   │   ├── services/       # Business logic (premium calc, fraud, weather)
+│   │   ├── models/         # Mongoose schemas (Policy, Claim, User)
+│   │   ├── routes/         # API endpoints with middleware
+│   │   ├── middleware/      # Auth, validation, error handling
+│   │   └── config/         # Environment & DB configuration
+│   └── uploads/            # Evidence files (images/videos)
+├── frontend/               # React.js SPA
+│   ├── src/
+│   │   ├── api/            # Axios API client wrappers
+│   │   ├── components/     # Reusable UI (PaymentModal, FraudMeter, Badge)
+│   │   ├── pages/          # Route pages (Dashboard, Quote, Claims, Monitor)
+│   │   ├── context/        # Auth context provider
+│   │   └── hooks/          # Custom React hooks
+├── ai-engine/              # FastAPI Python microservice
+│   ├── main.py             # Risk assessment & fraud detection endpoints
+│   ├── models/             # Isolation Forest trained models
+│   └── requirements.txt
+└── docker-compose.yml      # Multi-container orchestration
+```
 
 ---
 
 ## 🎥 Demo Video
 
-**Demo Video**: [ADD YOUR VIDEO LINK HERE]
+**Demo Video**: [Coming Soon]
 
 ---
 
 ## 📊 Pitch Deck
 
-**Pitch Deck**: [ADD YOUR DRIVE LINK HERE]
+**Pitch Deck**: [Coming Soon]
 
 ---
 
-## 📦 Folder Structure
-```text
-BlinkShield_AI/
-├── backend/            # Express.js REST API
-│   ├── src/
-│   │   ├── controllers/ # Route logic (e.g. payment.controller.js)
-│   │   ├── services/    # Business logic (e.g. weather.service.js)
-│   │   ├── models/      # Mongoose schemas
-│   │   ├── routes/      # Endpoints
-│   │   └── ...
-├── frontend/           # React.js SPA Client
-│   ├── src/
-│   │   ├── api/         # Axios wrappers coordinating endpoints
-│   │   ├── components/  # Reusable UI Blocks (PaymentModal, FraudMeter)
-│   │   ├── pages/       # Dashboard routes
-│   │   └── ...
-├── ai-engine/          # FastAPI Python Server
-│   ├── main.py
-│   ├── models/          # IsolationForest pickled states
-│   └── ...
-└── docker-compose.yml   # Multi-container orchestration
-```
+## 👥 Team
+
+**Team Guidewire 2026** — Built for the Guidewire Hackathon
+
+---
+
+## 📄 License
+
+This project is built for the Guidewire Hackathon 2026. All rights reserved.

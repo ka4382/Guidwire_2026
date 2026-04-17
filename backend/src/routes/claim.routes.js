@@ -12,11 +12,18 @@ import {
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { validateRequest } from "../middleware/validate.js";
 import { claimReviewSchema, fileClaimSchema, triggerClaimSchema } from "../validators/claim.validator.js";
+import multer from "multer";
 
 export const claimRouter = Router();
 
+// Configure Multer for evidence uploads
+const upload = multer({
+  dest: "uploads/",
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
 claimRouter.post("/trigger", requireAuth, validateRequest(triggerClaimSchema), triggerClaim);
-claimRouter.post("/file", requireAuth, validateRequest(fileClaimSchema), fileClaimManually);
+claimRouter.post("/file", requireAuth, upload.single("media"), fileClaimManually);
 claimRouter.get("/admin/pending", requireAuth, requireRole("admin"), getAdminPendingClaims);
 claimRouter.get("/admin/all", requireAuth, requireRole("admin"), getAdminAllClaims);
 claimRouter.get("/details/:claimId", requireAuth, getClaimById);

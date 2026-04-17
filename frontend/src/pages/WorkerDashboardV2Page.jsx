@@ -89,6 +89,27 @@ export function WorkerDashboardV2Page() {
         />
       </div>
 
+      {summary.activePolicyExists && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-3 rounded-2xl bg-emerald-600 p-4 text-white shadow-lg shadow-emerald-200"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+            <ShieldCheck size={24} />
+          </div>
+          <div>
+            <p className="text-sm font-bold">🛡️ Your income is protected for this week</p>
+            <p className="text-[11px] opacity-80">Active policy coverage: {formatCurrency(summary.coverageAmount)}</p>
+          </div>
+          <div className="ml-auto">
+            <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+              Active
+            </span>
+          </div>
+        </motion.div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         {/* AI Premium Explainability */}
         <motion.div
@@ -116,7 +137,7 @@ export function WorkerDashboardV2Page() {
             <div className="mt-4 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Badge
-                  label={summary.activePolicyExists ? "Policy active" : "No active policy"}
+                  label={summary.activePolicyExists ? "🟢 ACTIVE POLICY" : "No active policy"}
                   tone={summary.activePolicyExists ? "active" : "inactive"}
                 />
               </div>
@@ -210,16 +231,16 @@ export function WorkerDashboardV2Page() {
       </div>
 
       {/* Recent claims list */}
-      {recentClaims.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="p-6" hover={false}>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">
-              Recent claims
-            </p>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="p-6" hover={false}>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">
+            Recent claims
+          </p>
+          {recentClaims.length > 0 ? (
             <div className="space-y-3">
               {recentClaims.map((claim) => (
                 <div
@@ -247,9 +268,17 @@ export function WorkerDashboardV2Page() {
                 </div>
               ))}
             </div>
-          </Card>
-        </motion.div>
-      )}
+          ) : (
+            <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <div className="mx-auto h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 mb-3">
+                <ShieldCheck size={24} />
+              </div>
+              <p className="text-sm font-bold text-slate-600">No claims yet. You are protected!</p>
+              <p className="text-xs text-slate-400 mt-1">If you face a disruption, file a claim in the Claims section.</p>
+            </div>
+          )}
+        </Card>
+      </motion.div>
     </div>
   );
 }
