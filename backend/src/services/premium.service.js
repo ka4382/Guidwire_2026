@@ -96,22 +96,25 @@ export function calculateRiskQuoteFromInputs(input) {
   const weeklyPremium = clamp(basePremium + adjustment, 18, 68);
   coverageAmount = clamp(Math.round((coverageAmount + adjustment * 8) / 10) * 10, 200, 650);
 
+  const base = weeklyPremium;
+  const coverage = coverageAmount;
+
   const plans = {
     lite: {
-      weekly_premium: Math.round(weeklyPremium * 0.6),
-      coverage_amount: Math.round(coverageAmount * 0.6),
+      premium: Math.round(base * 0.6),
+      coverage: Math.round(coverage * 0.6),
       label: "Lite Plan",
       features: ["Basic income protection", "Standard claim processing"]
     },
     standard: {
-      weekly_premium: Math.round(weeklyPremium),
-      coverage_amount: Math.round(coverageAmount),
+      premium: base,
+      coverage: coverage,
       label: "Standard Plan",
       features: ["Full income protection", "Fast claim processing", "Priority support"]
     },
     premium: {
-      weekly_premium: Math.round(weeklyPremium * 1.6),
-      coverage_amount: Math.round(coverageAmount * 1.6),
+      premium: Math.round(base * 1.6),
+      coverage: Math.round(coverage * 1.6),
       label: "Premium Plan",
       features: ["Max income protection", "Instant AI payouts", "Multi-zone coverage", "Premium support"]
     }
@@ -178,6 +181,35 @@ export async function calculatePremium(workerId) {
       safeZoneDiscount: zoneMeta.safeZoneDiscount
     })
   );
+
+  // CRITICAL: The Python AI engine does NOT return `plans` — only the JS
+  // fallback does.  Always ensure plans exist with distinct tier pricing.
+  if (!quote.plans) {
+    const basePremium = quote.weekly_premium;
+    const baseCoverage = quote.coverage_amount;
+    quote.plans = {
+      lite: {
+        premium: Math.round(basePremium * 0.6),
+        coverage: Math.round(baseCoverage * 0.6),
+        label: "Lite Plan",
+        features: ["Basic income protection", "Standard claim processing"]
+      },
+      standard: {
+        premium: basePremium,
+        coverage: baseCoverage,
+        label: "Standard Plan",
+        features: ["Full income protection", "Fast claim processing", "Priority support"]
+      },
+      premium: {
+        premium: Math.round(basePremium * 1.6),
+        coverage: Math.round(baseCoverage * 1.6),
+        label: "Premium Plan",
+        features: ["Max income protection", "Instant AI payouts", "Multi-zone coverage", "Premium support"]
+      }
+    };
+  }
+
+  console.log("[PremiumService] Plans generated:", JSON.stringify(quote.plans));
 
   profile.riskProfile = {
     riskLevel: quote.risk_level,

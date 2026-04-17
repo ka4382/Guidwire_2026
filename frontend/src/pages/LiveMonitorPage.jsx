@@ -105,7 +105,7 @@ export function LiveMonitorPage() {
           <div className="flex items-center gap-2">
             <Radio size={16} className="text-ocean" strokeWidth={2.5} />
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Active stored events
+              Showing latest 5 disruptions
             </p>
           </div>
           {data?.activeEvents?.length ? (
@@ -114,7 +114,9 @@ export function LiveMonitorPage() {
                 <div key={event._id} className="rounded-xl bg-slate-50 p-4 transition-colors hover:bg-slate-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-ink">{titleCase(event.type)}</p>
+                      <p className="font-bold text-ink">
+                        {titleCase(event.type)} {event.totalSimilar > 1 ? `(${event.totalSimilar} events)` : ''}
+                      </p>
                       <p className="text-xs text-slate-500">{event.zone}</p>
                     </div>
                     <Badge label={event.severity} tone={event.severity} />
@@ -125,7 +127,7 @@ export function LiveMonitorPage() {
                       <strong className="text-ink">{event.thresholdValue}</strong>
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">Started {formatDate(event.startedAt)}</p>
+                  <p className="mt-1 text-xs text-slate-500">Latest: {new Date(event.createdAt || event.startedAt).toLocaleTimeString("en-IN", { hour: 'numeric', minute: '2-digit' })}</p>
                 </div>
               ))}
             </div>

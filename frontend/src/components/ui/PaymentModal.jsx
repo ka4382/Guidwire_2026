@@ -93,10 +93,10 @@ export function PaymentModal({
                 <h3 className="text-xl font-bold text-ink mb-2">Payment Successful!</h3>
                 <p className="text-slate-600 mb-6">
                   ✅ Policy Activated<br />
-                  <span className="text-sm">Valid for 7 Days</span>
+                  <span className="text-sm">You are protected for 7 days</span>
                 </p>
                 <div className="rounded-xl bg-emerald-50 p-4 mb-6 text-sm text-emerald-800 font-medium border border-emerald-100">
-                  You are now protected against income loss due to weather disruptions.
+                  Your BlinkShield coverage is now active against weather and API disruptions.
                 </div>
                 <Button fullWidth onClick={onClose}>
                   Go to Dashboard

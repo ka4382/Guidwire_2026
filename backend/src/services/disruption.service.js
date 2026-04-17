@@ -125,13 +125,28 @@ export async function getLiveDisruptions(zone) {
     })
   );
 
-  const activeEvents = await DisruptionEvent.find({ isTriggerActive: true })
+  const activeEventsRaw = await DisruptionEvent.find({ isTriggerActive: true })
     .sort({ createdAt: -1 })
     .lean();
 
+  const uniqueEvents = [];
+  const seen = new Set();
+  
+  for (const ev of activeEventsRaw) {
+    // If events share the same type + zone + same minute, count as duplicate from orchestration
+    const timeKey = new Date(ev.createdAt).toISOString().slice(0, 16);
+    const key = `${ev.type}-${ev.zone}-${timeKey}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueEvents.push(ev);
+    }
+  }
+
+  const limitedEvents = uniqueEvents.slice(0, 5);
+
   return {
     monitoredZones: results,
-    activeEvents
+    activeEvents: limitedEvents
   };
 }
 

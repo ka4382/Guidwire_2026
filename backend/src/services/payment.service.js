@@ -46,10 +46,9 @@ export async function processPolicyPayment(policyId, paymentMethod) {
 
     return {
       success: true,
-      message: "Payment successful. You are now protected against income loss.",
-      transactionId,
-      validUntil,
-      status: "ACTIVE"
+      policy_status: "ACTIVE",
+      transaction_id: transactionId,
+      payment_method: paymentMethod
     };
   } catch (error) {
     console.error("[PaymentService] Error:", error.message);

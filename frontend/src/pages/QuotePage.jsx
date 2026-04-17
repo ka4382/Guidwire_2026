@@ -27,6 +27,7 @@ export function QuotePage() {
   const loadQuote = async () => {
     setLoading(true);
     const result = await appApi.calculatePremium(user._id);
+    console.log("QUOTE DATA:", result.quote);
     setQuote(result.quote);
     setLoading(false);
   };
@@ -40,17 +41,22 @@ export function QuotePage() {
   const handlePaymentSuccess = async (method) => {
     setActivating(true);
     try {
-      // Pass tier logic if the backend policy supports tier saving, otherwise it uses quote base
       const created = await appApi.createPolicy({ workerId: user._id, tier: selectedTier });
       const paymentResponse = await appApi.simulatePayment({
         policyId: created._id,
         method: method
       });
-      setPolicy(paymentResponse.data);
-      setMessage(paymentResponse.data.message || "Weekly policy activated. BlinkShield will now auto-monitor your assigned zone.");
-      setTimeout(() => {
-        setShowPayment(false);
-      }, 2000);
+
+      // fetcher() returns response.data.data — paymentResponse IS the result object
+      if (paymentResponse && paymentResponse.success) {
+        setPolicy(paymentResponse);
+        setMessage("✅ Policy Activated — You are protected for 7 days.");
+        setTimeout(() => {
+          setShowPayment(false);
+        }, 2000);
+      } else {
+        setMessage("Failed to activate policy via payment mock.");
+      }
     } catch (e) {
       console.error(e);
       setMessage("Failed to activate policy via payment mock.");
@@ -63,9 +69,12 @@ export function QuotePage() {
     return <Loader label="Generating your weekly quote..." />;
   }
 
-  const activePlan = quote.plans?.[selectedTier] || {
-    weekly_premium: quote.weekly_premium,
-    coverage_amount: quote.coverage_amount
+  console.log("SELECTED PLAN:", selectedTier);
+
+  // Get the selected plan's data — plans are always guaranteed by the backend
+  const selectedPlanData = quote.plans?.[selectedTier] || quote.plans?.standard || {
+    premium: quote.weekly_premium,
+    coverage: quote.coverage_amount
   };
 
   return (
@@ -101,8 +110,8 @@ export function QuotePage() {
             <div className="mt-6 flex flex-col gap-4 md:flex-row">
               {['lite', 'standard', 'premium'].map((tier) => {
                 const planData = quote.plans?.[tier] || {
-                  weekly_premium: quote.weekly_premium,
-                  coverage_amount: quote.coverage_amount,
+                  premium: quote.weekly_premium,
+                  coverage: quote.coverage_amount,
                   label: tier === 'lite' ? 'Lite' : tier === 'standard' ? 'Standard' : 'Premium',
                 };
                 
@@ -113,24 +122,28 @@ export function QuotePage() {
                     key={tier}
                     onClick={() => setSelectedTier(tier)}
                     className={`flex-1 cursor-pointer rounded-2xl border-2 p-4 transition-all ${
-                      isSelected ? 'border-ocean bg-ocean/5' : 'border-slate-100 bg-white hover:border-slate-200'
+                      isSelected ? 'border-ocean bg-ocean/5 shadow-sm' : 'border-slate-100 bg-white hover:border-slate-200'
                     }`}
                   >
                     <div className="flex justify-between items-center mb-2">
                        <p className={`text-[11px] font-bold uppercase tracking-wider ${isSelected ? 'text-ocean' : 'text-slate-500'}`}>
-                         {planData.label}
+                         {planData.label || tier}
                        </p>
                        {isSelected && <CheckCircle2 size={14} className="text-ocean" />}
                     </div>
                     <p className={`text-2xl font-extrabold tracking-tight ${isSelected ? 'text-ocean-dark' : 'text-ink'}`}>
-                      {formatCurrency(planData.weekly_premium)}
+                      {formatCurrency(planData.premium || planData.weekly_premium)}
                     </p>
                     <p className="mt-1 text-xs font-semibold text-emerald-600">
-                      Covers {formatCurrency(planData.coverage_amount)}
+                      Covers {formatCurrency(planData.coverage || planData.coverage_amount)}
                     </p>
                   </div>
                 )
               })}
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50/50 p-3 text-sm text-slate-600 border border-blue-100/50">
+              💡 Choose a plan based on your risk and protection needs
             </div>
 
             <div className="mt-4 rounded-xl bg-orange-50 p-4 border border-orange-100">
@@ -139,24 +152,24 @@ export function QuotePage() {
               </p>
               <p className="text-sm font-medium text-orange-800">
                 If bad weather occurs, you may lose <span className="font-bold">₹600</span> in earnings.<br/>
-                Your {" "}<span className="font-bold">{formatCurrency(activePlan.weekly_premium)}</span>{" "} coverage protects up to {" "}<span className="font-bold">{formatCurrency(activePlan.coverage_amount)}</span>.
+                Your coverage protects up to {" "}<span className="font-bold">{formatCurrency(selectedPlanData.coverage || selectedPlanData.coverage_amount)}</span>.
               </p>
             </div>
 
             <Button
               variant="success"
               icon={ShieldCheck}
-              className="mt-6 w-full"
+              className="mt-6 w-full shadow-lg shadow-emerald-600/20"
               onClick={() => setShowPayment(true)}
               disabled={activating}
             >
-              {activating ? "Activating..." : "Activate weekly policy"}
+              {activating ? "Activating..." : `Activate ${selectedTier} policy`}
             </Button>
 
             <PaymentModal 
               isOpen={showPayment}
-              premiumAmount={activePlan.weekly_premium}
-              coverageAmount={activePlan.coverage_amount}
+              premiumAmount={selectedPlanData.premium || selectedPlanData.weekly_premium}
+              coverageAmount={selectedPlanData.coverage || selectedPlanData.coverage_amount}
               onClose={() => setShowPayment(false)}
               onSuccess={handlePaymentSuccess}
             />
